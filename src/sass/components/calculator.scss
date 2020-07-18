@@ -5,19 +5,35 @@
     overflow: hidden;
 
     &__result {
-        height: 14rem;
+        height: 15rem;
         width: 100%;
         background-color: $color-dark;
-        padding: 2rem;
-        text-align: end;
+        padding: 3rem;
 
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    &__operation {
+        width: 100%;
+        text-align: end;
+        color: $color-secondary;
+        font-weight: 300;
+        font-size: 1.8rem;
+        margin-top: 1.5rem;
+    }
+
+    &__result-value {
+        width: 100%;
+        text-align: end;
         color: $color-white;
         font-weight: 300;
-        font-size: 6rem;
+        font-size: 5.5rem;
     }
 
     &__controls {
-        height: 50rem;
+        height: 49rem;
         background-color: $color-white;
 
         display: grid;

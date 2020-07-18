@@ -7,6 +7,7 @@ const Calculator = (props) => {
   const [n2, setN2] = useState(null);
   const [operation, setOperation] = useState('');
   const [operator, setOperator] = useState(null);
+  const [isOperator, setIsOperator] = useState(false);
   const [result, setResult] = useState(null);
 
   console.log('lol');
@@ -14,7 +15,22 @@ const Calculator = (props) => {
   const actionHandler = (sign) => {
     switch (sign) {
       case '%':
-        console.log('%');
+        if (result) {
+          setResult((previousValue) => {
+            return previousValue / 100;
+          });
+          setN1((previousValue) => {
+            return previousValue / 100;
+          });
+        } else if (n2) {
+          setN2((previousValue) => {
+            return previousValue / 100;
+          });
+        } else {
+          setN1((previousValue) => {
+            return previousValue / 100;
+          });
+        }
         break;
       case 'S':
         // CHANGE SIGN
@@ -38,79 +54,145 @@ const Calculator = (props) => {
       case 'C':
         // RESET
         setN1(0);
-        setN2(0);
+        setN2(null);
         setOperation('');
         setOperator(null);
         setResult(null);
         break;
       case '/':
+        if (isOperator) {
+          calculate();
+          setN2(null);
+        }
         setOperator('/');
+        setOperation((previousValue) => {
+          return previousValue + ' ' + sign + ' ';
+        });
         break;
       case '*':
+        if (isOperator) {
+          calculate();
+          setN2(null);
+        }
         setOperator('*');
+        setOperation((previousValue) => {
+          return previousValue + ' x ';
+        });
         break;
       case '-':
+        if (isOperator) {
+          calculate();
+          setN2(null);
+        }
         setOperator('-');
+        setOperation((previousValue) => {
+          return previousValue + ' ' + sign + ' ';
+        });
         break;
       case '+':
+        if (isOperator) {
+          calculate();
+          setN2(null);
+        }
         setOperator('+');
+        setOperation((previousValue) => {
+          return previousValue + ' ' + sign + ' ';
+        });
         break;
       case ',':
         console.log(',');
         break;
       case '=':
         // OPERATION RESULT
+        setOperation((previousValue) => {
+          return previousValue + ' ' + operator + ' ' + n2;
+        });
         calculate();
         break;
       default:
-        if (Number.isInteger(sign) && !operator) {
-          setN1((previousValue) => {
-            if (previousValue === 0) {
-              return String(sign);
-            }
-            return previousValue + String(sign);
-          });
-        } else if (Number.isInteger(sign) && operator) {
-          setN2((previousValue) => {
-            if (previousValue === null) {
-              return String(sign);
-            }
-            return previousValue + String(sign);
-          });
+        if (result) {
+          if (Number.isInteger(sign) && operator) {
+            setN2(sign);
+            setOperation((previousValue) => {
+              return previousValue + sign;
+            });
+          }
+        } else {
+          if (Number.isInteger(sign) && !operator) {
+            setN1((previousValue) => {
+              if (previousValue === 0) {
+                return String(sign);
+              }
+              return previousValue + String(sign);
+            });
+            setOperation((previousValue) => {
+              return previousValue + sign;
+            });
+          } else if (Number.isInteger(sign) && operator) {
+            setIsOperator(true);
+            setN2((previousValue) => {
+              if (previousValue === null || previousValue === 0) {
+                return String(sign);
+              }
+              return previousValue + String(sign);
+            });
+            setOperation((previousValue) => {
+              return previousValue + sign;
+            });
+          }
         }
     }
   };
 
   const calculate = () => {
     let result;
-    switch (operator) {
-      case '/':
-        result = n1 / n2;
-        setN1(result);
-        setResult(result);
-        break;
-      case '*':
-        result = n1 * n2;
-        setN1(result);
-        setResult(result);
-        break;
-      case '-':
-        result = n1 - n2;
-        setN1(result);
-        setResult(result);
-        break;
-      case '+':
-      default:
-        result = n1 + n2;
-        setN1(result);
-        setResult(result);
+    if (!isNaN(n2) && operator) {
+      switch (operator) {
+        case '/':
+          if (Number(n2) === 0) {
+            setOperation('Error! Cannot divide by 0.');
+            setN1(0);
+            setN2(null);
+            setOperator(null);
+            setResult(null);
+            break;
+          }
+          result = +n1 / n2;
+          setN1(result);
+          setResult(result);
+          setIsOperator(false);
+          break;
+        case '*':
+          result = +n1 * n2;
+          setN1(result);
+          setResult(result);
+          setIsOperator(false);
+          break;
+        case '-':
+          result = +n1 - n2;
+          setN1(result);
+          setResult(result);
+          setIsOperator(false);
+          break;
+        case '+':
+        default:
+          result = +n1 + +n2;
+          setN1(result);
+          setResult(result);
+          setIsOperator(false);
+      }
+    } else {
+      setResult(n1);
     }
   };
 
   return (
     <div className="calculator">
       <div className="calculator__result">
-        {result ? result : n2 ? n2 : n1}
+        <div className="calculator__operation">{operation}</div>
+        <div className="calculator__result-value">
+          {result ? result : n2 ? n2 : n1}
+        </div>
       </div>
       <div className="calculator__controls">
         <Control
