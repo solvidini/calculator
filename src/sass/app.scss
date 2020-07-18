@@ -1,0 +1,57 @@
+@import './variables';
+@import './mixins';
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+}
+
+html {
+    font-size: 62.5%;
+    font-weight: 400;
+
+    @include respond(big-desktop) {
+        font-size: 75%;
+    }
+
+    @include respond(tab-land) {
+        font-size: 56.25%;
+    }
+
+    @include respond(tab-port) {
+        font-size: 50%;
+    }
+}
+
+body {
+    box-sizing: border-box;
+    font-family: 'Lato', sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+        monospace;
+}
+
+::selection {
+    background-color: rgba($color-secondary, .8);
+    color: $color-white;
+}
+
+.app {
+    width: 100%;
+    min-height: 100vh;
+    height: 100%;
+    
+    @include mainGradientBackground();
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
