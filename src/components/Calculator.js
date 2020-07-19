@@ -21,6 +21,7 @@ const Calculator = (props) => {
   const actionHandler = (sign) => {
     switch (sign) {
       case '%':
+        // PERCENTAGE
         if (result) {
           setResult((previousValue) => {
             return previousValue / 100;
@@ -65,87 +66,8 @@ const Calculator = (props) => {
         setOperator(null);
         setResult(null);
         break;
-      case '/':
-        if (
-          correctLastSign(
-            lastSign,
-            operation,
-            setOperation,
-            setOperator,
-            '/'
-          )
-        ) {
-          break;
-        }
-        if (n2 && lastSign !== '=') {
-          calculate();
-          setN2(null);
-        }
-        setOperator('/');
-        setOperation(addBrackets(operation, sign));
-        break;
-      case 'x':
-        if (
-          correctLastSign(
-            lastSign,
-            operation,
-            setOperation,
-            setOperator,
-            'x'
-          )
-        ) {
-          break;
-        }
-        if (n2 && lastSign !== '=') {
-          calculate();
-          setN2(null);
-        }
-        setOperator('x');
-        setOperation(addBrackets(operation, sign));
-        break;
-      case '-':
-        if (
-          correctLastSign(
-            lastSign,
-            operation,
-            setOperation,
-            setOperator,
-            '-'
-          )
-        ) {
-          break;
-        }
-        if (n2 && lastSign !== '=') {
-          calculate();
-          setN2(null);
-        }
-        setOperator('-');
-        setOperation((previousValue) => {
-          return previousValue + ' ' + sign + ' ';
-        });
-        break;
-      case '+':
-        if (
-          correctLastSign(
-            lastSign,
-            operation,
-            setOperation,
-            setOperator,
-            '+'
-          )
-        ) {
-          break;
-        }
-        if (n2 && lastSign !== '=') {
-          calculate();
-          setN2(null);
-        }
-        setOperator('+');
-        setOperation((previousValue) => {
-          return previousValue + ' ' + sign + ' ';
-        });
-        break;
       case ',':
+        // ADD DECIMAL POINT
         if (
           lastSign === '/' ||
           lastSign === 'x' ||
@@ -154,6 +76,9 @@ const Calculator = (props) => {
         ) {
           break;
         } else if (lastSign === '=') {
+          if (String(n1).includes('.')) {
+            break;
+          }
           setOperation(result + ',');
           setN1(n1 + '.');
           setResult(null);
@@ -188,6 +113,14 @@ const Calculator = (props) => {
         break;
       case '=':
         // OPERATION RESULT
+        if (
+          lastSign === '/' ||
+          lastSign === 'x' ||
+          lastSign === '-' ||
+          lastSign === '+'
+        ) {
+          break;
+        }
         if (lastSign === '=' && n2) {
           setOperation((previousValue) => {
             return previousValue + ' ' + operator + ' ' + n2;
@@ -200,6 +133,31 @@ const Calculator = (props) => {
           setN2(Number(String(n2).slice(0, -1)));
         }
         calculate();
+        break;
+      case '/':
+      case 'x':
+      case '-':
+      case '+':
+        // OPERATORS
+        if (
+          correctLastSign(
+            lastSign,
+            operation,
+            setOperation,
+            setOperator,
+            sign
+          )
+        ) {
+          calculate();
+          setN2(null);
+          break;
+        }
+        if (n2 && lastSign !== '=') {
+          calculate();
+          setN2(null);
+        }
+        setOperator(sign);
+        setOperation(addBrackets(operation, sign));
         break;
       default:
         // NUMBERS
@@ -237,8 +195,23 @@ const Calculator = (props) => {
           });
         }
     }
-
-    setLastSign(sign);
+    // TO PREVENT OPERATORS DUPLICATION IN OPERATIONS
+    if (
+      ((lastSign === '/' ||
+        lastSign === 'x' ||
+        lastSign === '-' ||
+        lastSign === '+') &&
+        sign === ',') ||
+      ((lastSign === '/' ||
+        lastSign === 'x' ||
+        lastSign === '-' ||
+        lastSign === '+') &&
+        sign === '=')
+    ) {
+      setLastSign('+');
+    } else {
+      setLastSign(sign);
+    }
   };
 
   const calculate = () => {

@@ -21,15 +21,15 @@ export const correctLastSign = (
     setOperator(sign);
     return true;
   }
+  return false;
 };
 
 export const addBrackets = (operation, sign) => {
-  if (operation.includes('+') || operation.includes('-')) {
-    let newOperation =
-      '(' +
-      operation +
-      ')' +
-      ' ' + sign + ' ';
+  if (
+    (operation.includes('+') || operation.includes('-')) &&
+    (sign === 'x' || sign === '/')
+  ) {
+    let newOperation = '(' + operation + ')  ' + sign + ' ';
     return newOperation;
   }
   return operation + ' ' + sign + ' ';
