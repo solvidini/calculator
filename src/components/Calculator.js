@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
 
 import Control from './Control';
+import { correctLastSign } from '../utils/corrects';
 
 const Calculator = (props) => {
   const [n1, setN1] = useState(0);
   const [n2, setN2] = useState(null);
   const [operation, setOperation] = useState('');
   const [operator, setOperator] = useState(null);
-  const [isOperator, setIsOperator] = useState(false);
   const [result, setResult] = useState(null);
+  const [lastSign, setLastSign] = useState(null);
 
-  console.log('lol');
+  console.log('n1: ' + n1);
+  console.log('n2: ' + n2);
+  console.log('operator: ' + operator);
+  console.log('result: ' + result);
+  console.log('last sign: ' + lastSign);
+  console.log('------------------');
 
   const actionHandler = (sign) => {
     switch (sign) {
@@ -60,7 +66,18 @@ const Calculator = (props) => {
         setResult(null);
         break;
       case '/':
-        if (isOperator) {
+        if (
+          correctLastSign(
+            lastSign,
+            operation,
+            setOperation,
+            setOperator,
+            '/'
+          )
+        ) {
+          break;
+        }
+        if (operator) {
           calculate();
           setN2(null);
         }
@@ -69,18 +86,40 @@ const Calculator = (props) => {
           return previousValue + ' ' + sign + ' ';
         });
         break;
-      case '*':
-        if (isOperator) {
+      case 'x':
+        if (
+          correctLastSign(
+            lastSign,
+            operation,
+            setOperation,
+            setOperator,
+            'x'
+          )
+        ) {
+          break;
+        }
+        if (operator) {
           calculate();
           setN2(null);
         }
-        setOperator('*');
+        setOperator('x');
         setOperation((previousValue) => {
           return previousValue + ' x ';
         });
         break;
       case '-':
-        if (isOperator) {
+        if (
+          correctLastSign(
+            lastSign,
+            operation,
+            setOperation,
+            setOperator,
+            '-'
+          )
+        ) {
+          break;
+        }
+        if (operator) {
           calculate();
           setN2(null);
         }
@@ -90,7 +129,18 @@ const Calculator = (props) => {
         });
         break;
       case '+':
-        if (isOperator) {
+        if (
+          correctLastSign(
+            lastSign,
+            operation,
+            setOperation,
+            setOperator,
+            '+'
+          )
+        ) {
+          break;
+        }
+        if (operator) {
           calculate();
           setN2(null);
         }
@@ -100,13 +150,59 @@ const Calculator = (props) => {
         });
         break;
       case ',':
-        console.log(',');
+        if (!n2 && !operator && lastSign !== ',') {
+          if (
+            lastSign === '/' ||
+            lastSign === 'x' ||
+            lastSign === '-' ||
+            lastSign === '+'
+          ) {
+            const newOperation = operation.slice(0, -3);
+            setOperation(newOperation + ',');
+          }
+          if (n1.includes('.')) {
+            break;
+          }
+          setN1((previousValue) => {
+            if (previousValue === 0) {
+              return 0;
+            }
+            return previousValue + '.';
+          });
+          setOperation((previousValue) => {
+            return previousValue + sign;
+          });
+        } else if (n2 !== null && operator && lastSign !== ',') {
+          if (
+            lastSign === '/' ||
+            lastSign === 'x' ||
+            lastSign === '-' ||
+            lastSign === '+'
+          ) {
+            const newOperation = operation.slice(0, -3);
+            setOperation(newOperation + ',');
+          }
+          if (n2.includes('.')) {
+            break;
+          }
+          setN2((previousValue) => {
+            if (previousValue === null || previousValue === 0) {
+              return 0;
+            }
+            return previousValue + '.';
+          });
+          setOperation((previousValue) => {
+            return previousValue + sign;
+          });
+        }
         break;
       case '=':
         // OPERATION RESULT
-        setOperation((previousValue) => {
-          return previousValue + ' ' + operator + ' ' + n2;
-        });
+        if (lastSign === '=') {
+          setOperation((previousValue) => {
+            return previousValue + operator + n2;
+          });
+        }
         calculate();
         break;
       default:
@@ -129,7 +225,6 @@ const Calculator = (props) => {
               return previousValue + sign;
             });
           } else if (Number.isInteger(sign) && operator) {
-            setIsOperator(true);
             setN2((previousValue) => {
               if (previousValue === null || previousValue === 0) {
                 return String(sign);
@@ -142,6 +237,7 @@ const Calculator = (props) => {
           }
         }
     }
+    setLastSign(sign);
   };
 
   const calculate = () => {
@@ -157,29 +253,25 @@ const Calculator = (props) => {
             setResult(null);
             break;
           }
-          result = +n1 / n2;
+          result = +n1 / +n2;
           setN1(result);
           setResult(result);
-          setIsOperator(false);
           break;
-        case '*':
-          result = +n1 * n2;
+        case 'x':
+          result = +n1 * +n2;
           setN1(result);
           setResult(result);
-          setIsOperator(false);
           break;
         case '-':
-          result = +n1 - n2;
+          result = +n1 - +n2;
           setN1(result);
           setResult(result);
-          setIsOperator(false);
           break;
         case '+':
         default:
           result = +n1 + +n2;
           setN1(result);
           setResult(result);
-          setIsOperator(false);
       }
     } else {
       setResult(n1);
@@ -191,7 +283,7 @@ const Calculator = (props) => {
       <div className="calculator__result">
         <div className="calculator__operation">{operation}</div>
         <div className="calculator__result-value">
-          {result ? result : n2 ? n2 : n1}
+          {result !== null ? result : n2 ? n2 : n1}
         </div>
       </div>
       <div className="calculator__controls">
@@ -231,7 +323,7 @@ const Calculator = (props) => {
           title="9"
         />
         <Control
-          onClick={() => actionHandler('*')}
+          onClick={() => actionHandler('x')}
           modifier="violet-2"
           title="x"
         />

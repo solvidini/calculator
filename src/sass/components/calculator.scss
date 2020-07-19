@@ -17,10 +17,12 @@
 
     &__operation {
         width: 100%;
+        min-height: 1.8rem;
+        font-size: 1.8rem;
+        font-weight: 300;
+
         text-align: end;
         color: $color-secondary;
-        font-weight: 300;
-        font-size: 1.8rem;
         margin-top: 1.5rem;
     }
 
