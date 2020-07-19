@@ -34,3 +34,16 @@ export const addBrackets = (operation, sign) => {
   }
   return operation + ' ' + sign + ' ';
 };
+
+export const negate = (operation) => {
+  if (
+    operation.includes('+') ||
+    operation.includes('-') ||
+    operation.includes('x') ||
+    operation.includes('/')
+  ) {
+    let newOperation = '- (' + operation + ')';
+    return newOperation;
+  }
+  return '- ' + operation;
+};

@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 
 import Control from './Control';
-import { correctLastSign, addBrackets } from '../utils/corrects';
+import {
+  correctLastSign,
+  addBrackets,
+  negate,
+} from '../utils/corrects';
 
 const Calculator = (props) => {
   const [n1, setN1] = useState('0');
@@ -40,23 +44,12 @@ const Calculator = (props) => {
         }
         break;
       case 'S':
-        // CHANGE SIGN
-        if (result) {
-          setResult((previousValue) => {
-            return previousValue * -1;
-          });
-          setN1((previousValue) => {
-            return previousValue * -1;
-          });
-        } else if (n2) {
-          setN2((previousValue) => {
-            return previousValue * -1;
-          });
-        } else {
-          setN1((previousValue) => {
-            return previousValue * -1;
-          });
-        }
+        // NEGATE
+        const negateResult = calculate() * (-1);
+        setResult(negateResult);
+        setN1(negateResult);
+        setN2(null);
+        setOperation(negate(operation));
         break;
       case 'C':
         // RESET
@@ -256,8 +249,10 @@ const Calculator = (props) => {
           setResult(result);
       }
     } else {
+      result = n1;
       setResult(n1);
     }
+    return result;
   };
 
   return (
