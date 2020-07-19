@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 
 import Control from './Control';
-import {
-  correctLastSign,
-  addBrackets,
-  negate,
-} from '../utils/corrects';
+import { addBrackets, negate } from '../utils/corrects';
 
 const Calculator = (props) => {
   const [n1, setN1] = useState('0');
@@ -26,28 +22,40 @@ const Calculator = (props) => {
     switch (sign) {
       case '%':
         // PERCENTAGE
-        if (result) {
-          setResult((previousValue) => {
-            return previousValue / 100;
-          });
-          setN1((previousValue) => {
-            return previousValue / 100;
-          });
-        } else if (n2) {
-          setN2((previousValue) => {
-            return previousValue / 100;
-          });
-        } else {
-          setN1((previousValue) => {
-            return previousValue / 100;
-          });
-        }
+        // if (result) {
+        //   setResult((previousValue) => {
+        //     return previousValue / 100;
+        //   });
+        //   setN1((previousValue) => {
+        //     return previousValue / 100;
+        //   });
+        // } else if (n2) {
+        //   setN2((previousValue) => {
+        //     return previousValue / 100;
+        //   });
+        // } else {
+        //   setN1((previousValue) => {
+        //     return previousValue / 100;
+        //   });
+        // }
+        // + / -
+        const percentageResult = +n1 + (n2 / 100) * n1;
+        // * / /
+        // +n1 * n2/100
+        setResult(percentageResult);
+        setN1(percentageResult);
         break;
-      case 'S':
+      case 'N':
         // NEGATE
-        const negateResult = calculate() * (-1);
+        let negateResult;
+        if (lastSign === '=') {
+          negateResult = n1 * -1;
+        } else {
+          negateResult = calculate() * -1;
+        }
         setResult(negateResult);
         setN1(negateResult);
+        setOperator(null);
         setN2(null);
         setOperation(negate(operation));
         break;
@@ -68,7 +76,7 @@ const Calculator = (props) => {
           lastSign === '+'
         ) {
           break;
-        } else if (lastSign === '=') {
+        } else if (lastSign === '=' || lastSign === 'N') {
           if (String(n1).includes('.')) {
             break;
           }
@@ -133,14 +141,20 @@ const Calculator = (props) => {
       case '+':
         // OPERATORS
         if (
-          correctLastSign(
-            lastSign,
-            operation,
-            setOperation,
-            setOperator,
-            sign
-          )
+          lastSign === '/' ||
+          lastSign === 'x' ||
+          lastSign === '-' ||
+          lastSign === '+' ||
+          lastSign === ','
         ) {
+          let newOperation;
+          if (lastSign === ',') {
+            newOperation = operation.slice(0, -1);
+          } else {
+            newOperation = operation.slice(0, -3);
+          }
+          setOperation(addBrackets(newOperation, sign));
+          setOperator(sign);
           calculate();
           setN2(null);
           break;
@@ -154,6 +168,14 @@ const Calculator = (props) => {
         break;
       default:
         // NUMBERS
+        if (lastSign === '=' || lastSign === 'N') {
+          setOperation(n1 + String(sign));
+          setN1(n1 + String(sign));
+          setResult(null);
+          setN2(null);
+          setOperator(null);
+          break;
+        }
         if (result) {
           setResult(null);
           setN2(sign);
@@ -270,7 +292,7 @@ const Calculator = (props) => {
           title="%"
         />
         <Control
-          onClick={() => actionHandler('S')}
+          onClick={() => actionHandler('N')}
           modifier="basic"
           title="+/-"
         />
