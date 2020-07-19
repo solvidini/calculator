@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
 import Control from './Control';
-import { correctLastSign } from '../utils/corrects';
+import { correctLastSign, addBrackets } from '../utils/corrects';
 
 const Calculator = (props) => {
-  const [n1, setN1] = useState(0);
+  const [n1, setN1] = useState('0');
   const [n2, setN2] = useState(null);
   const [operation, setOperation] = useState('');
   const [operator, setOperator] = useState(null);
@@ -59,7 +59,7 @@ const Calculator = (props) => {
         break;
       case 'C':
         // RESET
-        setN1(0);
+        setN1('0');
         setN2(null);
         setOperation('');
         setOperator(null);
@@ -77,14 +77,12 @@ const Calculator = (props) => {
         ) {
           break;
         }
-        if (operator) {
+        if (n2 && lastSign !== '=') {
           calculate();
           setN2(null);
         }
         setOperator('/');
-        setOperation((previousValue) => {
-          return previousValue + ' ' + sign + ' ';
-        });
+        setOperation(addBrackets(operation, sign));
         break;
       case 'x':
         if (
@@ -98,14 +96,12 @@ const Calculator = (props) => {
         ) {
           break;
         }
-        if (operator) {
+        if (n2 && lastSign !== '=') {
           calculate();
           setN2(null);
         }
         setOperator('x');
-        setOperation((previousValue) => {
-          return previousValue + ' x ';
-        });
+        setOperation(addBrackets(operation, sign));
         break;
       case '-':
         if (
@@ -119,7 +115,7 @@ const Calculator = (props) => {
         ) {
           break;
         }
-        if (operator) {
+        if (n2 && lastSign !== '=') {
           calculate();
           setN2(null);
         }
@@ -140,7 +136,7 @@ const Calculator = (props) => {
         ) {
           break;
         }
-        if (operator) {
+        if (n2 && lastSign !== '=') {
           calculate();
           setN2(null);
         }
@@ -150,43 +146,37 @@ const Calculator = (props) => {
         });
         break;
       case ',':
-        if (!n2 && !operator && lastSign !== ',') {
-          if (
-            lastSign === '/' ||
-            lastSign === 'x' ||
-            lastSign === '-' ||
-            lastSign === '+'
-          ) {
-            const newOperation = operation.slice(0, -3);
-            setOperation(newOperation + ',');
-          }
-          if (n1.includes('.')) {
+        if (
+          lastSign === '/' ||
+          lastSign === 'x' ||
+          lastSign === '-' ||
+          lastSign === '+'
+        ) {
+          break;
+        } else if (lastSign === '=') {
+          setOperation(result + ',');
+          setN1(n1 + '.');
+          setResult(null);
+          setN2(null);
+          setOperator(null);
+          break;
+        }
+        if (!operator && lastSign !== ',') {
+          if (String(n1).includes('.')) {
             break;
           }
           setN1((previousValue) => {
-            if (previousValue === 0) {
-              return 0;
-            }
             return previousValue + '.';
           });
           setOperation((previousValue) => {
             return previousValue + sign;
           });
-        } else if (n2 !== null && operator && lastSign !== ',') {
-          if (
-            lastSign === '/' ||
-            lastSign === 'x' ||
-            lastSign === '-' ||
-            lastSign === '+'
-          ) {
-            const newOperation = operation.slice(0, -3);
-            setOperation(newOperation + ',');
-          }
-          if (n2.includes('.')) {
+        } else if (operator && lastSign !== ',') {
+          if (String(n2).includes('.')) {
             break;
           }
           setN2((previousValue) => {
-            if (previousValue === null || previousValue === 0) {
+            if (previousValue === null) {
               return 0;
             }
             return previousValue + '.';
@@ -198,51 +188,62 @@ const Calculator = (props) => {
         break;
       case '=':
         // OPERATION RESULT
-        if (lastSign === '=') {
+        if (lastSign === '=' && n2) {
           setOperation((previousValue) => {
-            return previousValue + operator + n2;
+            return previousValue + ' ' + operator + ' ' + n2;
           });
+        }
+        if (operation.charAt(operation.length - 1) === ',') {
+          setOperation(operation.slice(0, -1));
+        }
+        if (String(n2).charAt(String(n2).length - 1) === '.') {
+          setN2(Number(String(n2).slice(0, -1)));
         }
         calculate();
         break;
       default:
+        // NUMBERS
         if (result) {
-          if (Number.isInteger(sign) && operator) {
-            setN2(sign);
-            setOperation((previousValue) => {
-              return previousValue + sign;
-            });
+          setResult(null);
+          setN2(sign);
+          setOperation((previousValue) => {
+            return previousValue + sign;
+          });
+        } else if (!operator) {
+          if (n1 === 0 && lastSign === 0) {
+            break;
           }
-        } else {
-          if (Number.isInteger(sign) && !operator) {
-            setN1((previousValue) => {
-              if (previousValue === 0) {
-                return String(sign);
-              }
-              return previousValue + String(sign);
-            });
-            setOperation((previousValue) => {
-              return previousValue + sign;
-            });
-          } else if (Number.isInteger(sign) && operator) {
-            setN2((previousValue) => {
-              if (previousValue === null || previousValue === 0) {
-                return String(sign);
-              }
-              return previousValue + String(sign);
-            });
-            setOperation((previousValue) => {
-              return previousValue + sign;
-            });
+          setN1((previousValue) => {
+            if (previousValue === '0') {
+              return sign;
+            }
+            return previousValue + String(sign);
+          });
+          setOperation((previousValue) => {
+            return previousValue + sign;
+          });
+        } else if (operator) {
+          if (n2 === 0 && lastSign === 0) {
+            break;
           }
+          setN2((previousValue) => {
+            if (previousValue === null) {
+              return sign;
+            }
+            return previousValue + String(sign);
+          });
+          setOperation((previousValue) => {
+            return previousValue + String(sign);
+          });
         }
     }
+
     setLastSign(sign);
   };
 
   const calculate = () => {
     let result;
-    if (!isNaN(n2) && operator) {
+    if (n2 !== null && operator) {
       switch (operator) {
         case '/':
           if (Number(n2) === 0) {
@@ -253,23 +254,31 @@ const Calculator = (props) => {
             setResult(null);
             break;
           }
-          result = +n1 / +n2;
+          result =
+            +Math.round((+n1 / +n2 + Number.EPSILON) * 1000000000) /
+            1000000000;
           setN1(result);
           setResult(result);
           break;
         case 'x':
-          result = +n1 * +n2;
+          result =
+            +Math.round((+n1 * +n2 + Number.EPSILON) * 1000000000) /
+            1000000000;
           setN1(result);
           setResult(result);
           break;
         case '-':
-          result = +n1 - +n2;
+          result =
+            +Math.round((+n1 - +n2 + Number.EPSILON) * 1000000000) /
+            1000000000;
           setN1(result);
           setResult(result);
           break;
         case '+':
         default:
-          result = +n1 + +n2;
+          result =
+            +Math.round((+n1 + +n2 + Number.EPSILON) * 1000000000) /
+            1000000000;
           setN1(result);
           setResult(result);
       }

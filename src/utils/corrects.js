@@ -22,3 +22,15 @@ export const correctLastSign = (
     return true;
   }
 };
+
+export const addBrackets = (operation, sign) => {
+  if (operation.includes('+') || operation.includes('-')) {
+    let newOperation =
+      '(' +
+      operation +
+      ')' +
+      ' ' + sign + ' ';
+    return newOperation;
+  }
+  return operation + ' ' + sign + ' ';
+};
