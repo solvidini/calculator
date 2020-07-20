@@ -12,8 +12,23 @@ export const addBrackets = (operation, sign) => {
   return operation + ' ' + sign + ' ';
 };
 
-export const negate = (operation, lastSign) => {
+export const negate = (operation, lastSign, n2) => {
   let newOperation = operation;
+  if (n2) {
+    if (/(\(- \d+\))$/.test(operation)) {
+      console.log(true);
+      newOperation = newOperation.replace(
+        /(\(- \d+\))$/,
+        `${Math.abs(n2)}`
+      );
+    } else {
+      newOperation = newOperation.replace(
+        new RegExp(String(n2) + '$'),
+        `(- ${Math.abs(n2)})`
+      );
+    }
+    return newOperation;
+  }
   if (
     lastSign === '/' ||
     lastSign === 'x' ||

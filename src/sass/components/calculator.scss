@@ -3,6 +3,7 @@
     height: 64rem;
     border-radius: .7rem;
     overflow: hidden;
+    line-height: 1.1;
 
     display: flex;
     flex-direction: column;
@@ -14,6 +15,8 @@
     }
 
     &__result {
+        overflow-x: scroll;
+        overflow-y: hidden;
         flex-basis: 20%;
         width: 100%;
         background-color: $color-dark;
@@ -25,6 +28,7 @@
     }
 
     &__operation {
+        white-space: nowrap;
         width: 100%;
         min-height: 1.9rem;
         font-size: 1.9rem;
@@ -46,7 +50,7 @@
         text-align: end;
         color: $color-white;
         font-weight: 300;
-        font-size: 5.5rem;
+        font-size: 6rem;
     }
 
     &__controls {

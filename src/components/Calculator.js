@@ -11,6 +11,7 @@ const Calculator = (props) => {
   const [operation, setOperation] = useState('');
   const [lastSign, setLastSign] = useState(null);
   const [percentageMode, setPercentageMode] = useState(false);
+  const [error, setError] = useState(false);
 
   console.log('n1: ' + n1);
   console.log('n2: ' + n2);
@@ -40,7 +41,12 @@ const Calculator = (props) => {
       case 'N':
         // NEGATE
         let negateResult;
-        if (Number(n1) !== 0) {
+        if (!result && n2 !== 0) {
+          setN2((previousValue) => previousValue * -1);
+          setOperation(negate(operation, lastSign, n2));
+          break;
+        }
+        if (n1 !== 0) {
           if (lastSign === '=' || lastSign === '%') {
             negateResult = n1 * -1;
           } else {
@@ -123,7 +129,7 @@ const Calculator = (props) => {
           lastSign === 'x' ||
           lastSign === '-' ||
           lastSign === '+' ||
-          lastSign === 'N'
+          (!n2 && !operator)
         ) {
           break;
         }
@@ -153,6 +159,18 @@ const Calculator = (props) => {
       case '-':
       case '+':
         // OPERATORS
+        if (operator === '/' && Number(n2) === 0) {
+          calculate();
+          break;
+        }
+        if (n1 === '0') {
+          setOperator(sign);
+          setOperation('0 ' + sign + ' ');
+          break;
+        }
+        if (n2) {
+          setN2(null);
+        }
         if (
           lastSign === '/' ||
           lastSign === 'x' ||
@@ -177,7 +195,7 @@ const Calculator = (props) => {
           setN2(null);
           break;
         }
-        if (n2 && lastSign !== '=') {
+        if (n2 !== null && lastSign !== '=') {
           if (percentageMode) {
             setPercentageMode(false);
           } else {
@@ -222,7 +240,7 @@ const Calculator = (props) => {
             return previousValue + sign;
           });
         } else if (operator) {
-          if (n2 === 0 && lastSign === 0) {
+          if (n2 === 0 && sign === 0) {
             break;
           }
           setN2((previousValue) => {
@@ -273,8 +291,9 @@ const Calculator = (props) => {
       switch (operator) {
         case '/':
           if (Number(n2) === 0) {
+            setError(true);
             setOperation('Error! Cannot divide by 0.');
-            setN1(0);
+            setN1('0');
             setN2(null);
             setOperator(null);
             setResult(null);

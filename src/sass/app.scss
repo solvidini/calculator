@@ -55,3 +55,24 @@ code {
     justify-content: center;
     align-items: center;
 }
+
+::-webkit-scrollbar {
+    background-color: transparent;
+    height: 1rem;
+
+    @include respond(phone) {
+        height: 4px;
+    }
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: $color-secondary;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #f752a4;
+}
