@@ -29,7 +29,6 @@ const Calculator = (props) => {
           operator &&
           n2 &&
           lastSign !== '=' &&
-          lastSign !== 'N' &&
           lastSign !== '%' &&
           lastSign !== ',' &&
           Number(n1) !== 0
@@ -138,15 +137,39 @@ const Calculator = (props) => {
         }
         if (percentageMode) {
           calculate('%');
-          setOperation(
-            (previousValue) =>
-              previousValue + ' ' + operator + ' ' + n2 + '%'
-          );
+          if (n2 && n2 < 0) {
+            setOperation(
+              (previousValue) =>
+                previousValue +
+                ' ' +
+                operator +
+                ' (- ' +
+                Math.abs(n2) +
+                ')%'
+            );
+          } else {
+            setOperation(
+              (previousValue) =>
+                previousValue + ' ' + operator + ' ' + n2 + '%'
+            );
+          }
         } else {
           if (lastSign === '=' && n2) {
-            setOperation((previousValue) => {
-              return previousValue + ' ' + operator + ' ' + n2;
-            });
+            if (n2 < 0) {
+              setOperation(
+                (previousValue) =>
+                  previousValue +
+                  ' ' +
+                  operator +
+                  ' (- ' +
+                  Math.abs(n2) +
+                  ')'
+              );
+            } else {
+              setOperation((previousValue) => {
+                return previousValue + ' ' + operator + ' ' + n2;
+              });
+            }
           }
           if (operation.charAt(operation.length - 1) === ',') {
             setOperation(operation.slice(0, -1));
@@ -165,13 +188,13 @@ const Calculator = (props) => {
         if (error) {
           break;
         }
-        if (operator === '/' && Number(n2) === 0) {
-          calculate();
-          break;
-        }
         if (n1 === '0') {
           setOperator(sign);
           setOperation('0 ' + sign + ' ');
+          break;
+        }
+        if (operator === '/' && Number(n2) === 0) {
+          calculate();
           break;
         }
         if (n2) {
