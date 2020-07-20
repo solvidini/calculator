@@ -12,15 +12,29 @@ export const addBrackets = (operation, sign) => {
   return operation + ' ' + sign + ' ';
 };
 
-export const negate = (operation) => {
+export const negate = (operation, lastSign) => {
+  let newOperation = operation;
   if (
-    operation.includes('+') ||
-    operation.includes('-') ||
-    operation.includes('x') ||
-    operation.includes('/')
+    lastSign === '/' ||
+    lastSign === 'x' ||
+    lastSign === '-' ||
+    lastSign === '+' ||
+    (lastSign === ',' && operation.charAt(operation.length - 1) === ',')
   ) {
-    let newOperation = '- (' + operation + ')';
+    if (lastSign === ',') {
+      newOperation = newOperation.slice(0, -1);
+    } else {
+      newOperation = newOperation.slice(0, -3);
+    }
+  }
+  if (
+    newOperation.includes('+') ||
+    newOperation.includes('-') ||
+    newOperation.includes('x') ||
+    newOperation.includes('/')
+  ) {
+    newOperation = '- (' + newOperation + ')';
     return newOperation;
   }
-  return '- ' + operation;
+  return '- ' + newOperation;
 };

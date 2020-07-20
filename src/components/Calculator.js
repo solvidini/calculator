@@ -6,10 +6,11 @@ import { addBrackets, negate } from '../utils/corrects';
 const Calculator = (props) => {
   const [n1, setN1] = useState('0');
   const [n2, setN2] = useState(null);
-  const [operation, setOperation] = useState('');
-  const [operator, setOperator] = useState(null);
   const [result, setResult] = useState(null);
+  const [operator, setOperator] = useState(null);
+  const [operation, setOperation] = useState('');
   const [lastSign, setLastSign] = useState(null);
+  const [percentageMode, setPercentageMode] = useState(false);
 
   console.log('n1: ' + n1);
   console.log('n2: ' + n2);
@@ -22,45 +23,37 @@ const Calculator = (props) => {
     switch (sign) {
       case '%':
         // PERCENTAGE
-        // if (result) {
-        //   setResult((previousValue) => {
-        //     return previousValue / 100;
-        //   });
-        //   setN1((previousValue) => {
-        //     return previousValue / 100;
-        //   });
-        // } else if (n2) {
-        //   setN2((previousValue) => {
-        //     return previousValue / 100;
-        //   });
-        // } else {
-        //   setN1((previousValue) => {
-        //     return previousValue / 100;
-        //   });
-        // }
-        // + / -
-        const percentageResult = +n1 + (n2 / 100) * n1;
-        // * / /
-        // +n1 * n2/100
-        setResult(percentageResult);
-        setN1(percentageResult);
+        if (
+          operator &&
+          n2 &&
+          lastSign !== '=' &&
+          lastSign !== 'N' &&
+          lastSign !== '%' &&
+          lastSign !== ','
+        ) {
+          calculate('%');
+          setPercentageMode(true);
+          setOperation((previousValue) => previousValue + '%');
+        }
         break;
       case 'N':
         // NEGATE
         let negateResult;
-        if (lastSign === '=') {
+        if (lastSign === '=' || lastSign === '%') {
           negateResult = n1 * -1;
         } else {
           negateResult = calculate() * -1;
         }
+        setPercentageMode(false);
         setResult(negateResult);
         setN1(negateResult);
         setOperator(null);
         setN2(null);
-        setOperation(negate(operation));
+        setOperation(negate(operation, lastSign));
         break;
       case 'C':
         // RESET
+        setPercentageMode(false);
         setN1('0');
         setN2(null);
         setOperation('');
@@ -73,13 +66,16 @@ const Calculator = (props) => {
           lastSign === '/' ||
           lastSign === 'x' ||
           lastSign === '-' ||
-          lastSign === '+'
+          lastSign === '+' ||
+          lastSign === '%'
         ) {
           break;
-        } else if (lastSign === '=' || lastSign === 'N') {
+        }
+        if (lastSign === '=' || lastSign === 'N') {
           if (String(n1).includes('.')) {
             break;
           }
+          setPercentageMode(false);
           setOperation(result + ',');
           setN1(n1 + '.');
           setResult(null);
@@ -113,27 +109,36 @@ const Calculator = (props) => {
         }
         break;
       case '=':
-        // OPERATION RESULT
+        // RESULT
         if (
           lastSign === '/' ||
           lastSign === 'x' ||
           lastSign === '-' ||
-          lastSign === '+'
+          lastSign === '+' ||
+          lastSign === 'N'
         ) {
           break;
         }
-        if (lastSign === '=' && n2) {
-          setOperation((previousValue) => {
-            return previousValue + ' ' + operator + ' ' + n2;
-          });
+        if (percentageMode) {
+          calculate('%');
+          setOperation(
+            (previousValue) =>
+              previousValue + ' ' + operator + ' ' + n2 + '%'
+          );
+        } else {
+          if (lastSign === '=' && n2) {
+            setOperation((previousValue) => {
+              return previousValue + ' ' + operator + ' ' + n2;
+            });
+          }
+          if (operation.charAt(operation.length - 1) === ',') {
+            setOperation(operation.slice(0, -1));
+          }
+          if (String(n2).charAt(String(n2).length - 1) === '.') {
+            setN2(Number(String(n2).slice(0, -1)));
+          }
+          calculate();
         }
-        if (operation.charAt(operation.length - 1) === ',') {
-          setOperation(operation.slice(0, -1));
-        }
-        if (String(n2).charAt(String(n2).length - 1) === '.') {
-          setN2(Number(String(n2).slice(0, -1)));
-        }
-        calculate();
         break;
       case '/':
       case 'x':
@@ -145,7 +150,8 @@ const Calculator = (props) => {
           lastSign === 'x' ||
           lastSign === '-' ||
           lastSign === '+' ||
-          lastSign === ','
+          (lastSign === ',' &&
+            operation.charAt(operation.length - 1) === ',')
         ) {
           let newOperation;
           if (lastSign === ',') {
@@ -155,12 +161,20 @@ const Calculator = (props) => {
           }
           setOperation(addBrackets(newOperation, sign));
           setOperator(sign);
-          calculate();
+          if (percentageMode) {
+            setPercentageMode(false);
+          } else {
+            calculate();
+          }
           setN2(null);
           break;
         }
         if (n2 && lastSign !== '=') {
-          calculate();
+          if (percentageMode) {
+            setPercentageMode(false);
+          } else {
+            calculate();
+          }
           setN2(null);
         }
         setOperator(sign);
@@ -168,7 +182,8 @@ const Calculator = (props) => {
         break;
       default:
         // NUMBERS
-        if (lastSign === '=' || lastSign === 'N') {
+        setPercentageMode(false);
+        if (lastSign === '=' || lastSign === 'N' || lastSign === '%') {
           setOperation(n1 + String(sign));
           setN1(n1 + String(sign));
           setResult(null);
@@ -229,9 +244,21 @@ const Calculator = (props) => {
     }
   };
 
-  const calculate = () => {
+  const calculate = (operatorArg) => {
     let result;
-    if (n2 !== null && operator) {
+    if (operatorArg === '%') {
+      if (operator === '+') {
+        result = +n1 + (n2 / 100) * n1;
+      } else if (operator === '-') {
+        result = +n1 - (n2 / 100) * n1;
+      } else if (operator === 'x') {
+        result = +n1 * (n2 / 100);
+      } else if (operator === '/') {
+        result = +n1 / (n2 / 100);
+      }
+      setN1(result);
+      setResult(result);
+    } else if (n2 !== null && operator) {
       switch (operator) {
         case '/':
           if (Number(n2) === 0) {
