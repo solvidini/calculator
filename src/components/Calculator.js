@@ -25,6 +25,7 @@ const Calculator = (props) => {
       case '%':
         // PERCENTAGE
         if (
+          !error &&
           operator &&
           n2 &&
           lastSign !== '=' &&
@@ -41,12 +42,12 @@ const Calculator = (props) => {
       case 'N':
         // NEGATE
         let negateResult;
-        if (!result && n2 !== 0) {
+        if (!error && !result && n2 !== 0) {
           setN2((previousValue) => previousValue * -1);
           setOperation(negate(operation, lastSign, n2));
           break;
         }
-        if (n1 !== 0) {
+        if (!error && n1 !== 0) {
           if (lastSign === '=' || lastSign === '%') {
             negateResult = n1 * -1;
           } else {
@@ -68,10 +69,12 @@ const Calculator = (props) => {
         setOperation('');
         setOperator(null);
         setResult(null);
+        setError(false);
         break;
       case ',':
         // ADD DECIMAL POINT
-        if (n1 === '0') {
+        if (n1 === '0' || error) {
+          setError(false);
           setOperation('0,');
           setN1('0.');
           break;
@@ -159,6 +162,9 @@ const Calculator = (props) => {
       case '-':
       case '+':
         // OPERATORS
+        if (error) {
+          break;
+        }
         if (operator === '/' && Number(n2) === 0) {
           calculate();
           break;
@@ -209,6 +215,12 @@ const Calculator = (props) => {
       default:
         // NUMBERS
         setPercentageMode(false);
+        if (error) {
+          setError(false);
+          setOperation(String(sign));
+          setN1(sign);
+          break;
+        }
         if (
           (lastSign === '=' || lastSign === 'N' || lastSign === '%') &&
           n1 !== '0'
