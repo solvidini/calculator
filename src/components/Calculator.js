@@ -29,7 +29,8 @@ const Calculator = (props) => {
           lastSign !== '=' &&
           lastSign !== 'N' &&
           lastSign !== '%' &&
-          lastSign !== ','
+          lastSign !== ',' &&
+          Number(n1) !== 0
         ) {
           calculate('%');
           setPercentageMode(true);
@@ -39,17 +40,19 @@ const Calculator = (props) => {
       case 'N':
         // NEGATE
         let negateResult;
-        if (lastSign === '=' || lastSign === '%') {
-          negateResult = n1 * -1;
-        } else {
-          negateResult = calculate() * -1;
+        if (Number(n1) !== 0) {
+          if (lastSign === '=' || lastSign === '%') {
+            negateResult = n1 * -1;
+          } else {
+            negateResult = calculate() * -1;
+          }
+          setPercentageMode(false);
+          setResult(negateResult);
+          setN1(negateResult);
+          setOperator(null);
+          setN2(null);
+          setOperation(negate(operation, lastSign));
         }
-        setPercentageMode(false);
-        setResult(negateResult);
-        setN1(negateResult);
-        setOperator(null);
-        setN2(null);
-        setOperation(negate(operation, lastSign));
         break;
       case 'C':
         // RESET
@@ -62,6 +65,11 @@ const Calculator = (props) => {
         break;
       case ',':
         // ADD DECIMAL POINT
+        if (n1 === '0') {
+          setOperation('0,');
+          setN1('0.');
+          break;
+        }
         if (
           lastSign === '/' ||
           lastSign === 'x' ||
@@ -183,7 +191,10 @@ const Calculator = (props) => {
       default:
         // NUMBERS
         setPercentageMode(false);
-        if (lastSign === '=' || lastSign === 'N' || lastSign === '%') {
+        if (
+          (lastSign === '=' || lastSign === 'N' || lastSign === '%') &&
+          n1 !== '0'
+        ) {
           setOperation(n1 + String(sign));
           setN1(n1 + String(sign));
           setResult(null);
@@ -321,7 +332,13 @@ const Calculator = (props) => {
         <Control
           onClick={() => actionHandler('N')}
           modifier="basic"
-          title="+/-"
+          title={
+            <div className="negation">
+              <div className="negation__up">+</div>
+              <div>/</div>
+              <div className="negation__down">-</div>
+            </div>
+          }
         />
         <Control
           onClick={() => actionHandler('C')}
