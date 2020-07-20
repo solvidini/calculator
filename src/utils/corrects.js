@@ -3,10 +3,23 @@ export const addBrackets = (operation, sign) => {
     (operation.includes('+') || operation.includes('-')) &&
     (sign === 'x' || sign === '/')
   ) {
+    if (
+      operation.charAt(operation.length - 2) === ')' &&
+      operation.charAt(operation.length - 1) === '%'
+    ) {
+      return '(' + operation + ')  ' + sign + ' ';
+    }
     if (operation.charAt(operation.length - 2) === ')') {
       return operation + ' ' + sign + ' ';
     }
-    let newOperation = '(' + operation + ')  ' + sign + ' ';
+    return '(' + operation + ')  ' + sign + ' ';
+  }
+  if (
+    operation.charAt(operation.length - 2) === ')' &&
+    operation.charAt(operation.length - 1) !== '%'
+  ) {
+    let newOperation =
+      operation.substring(1).slice(0, -2) + ' ' + sign + ' ';
     return newOperation;
   }
   return operation + ' ' + sign + ' ';
