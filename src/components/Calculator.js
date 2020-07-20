@@ -18,6 +18,7 @@ const Calculator = (props) => {
   console.log('operator: ' + operator);
   console.log('result: ' + result);
   console.log('last sign: ' + lastSign);
+  console.log('Percentage mode: ' + percentageMode);
   console.log('------------------');
 
   const actionHandler = (sign) => {
@@ -41,12 +42,22 @@ const Calculator = (props) => {
       case 'N':
         // NEGATE
         let negateResult;
-        if (!error && !result && n2 && n2 !== 0) {
+        if (
+          lastSign === '/' ||
+          lastSign === 'x' ||
+          lastSign === '-' ||
+          lastSign === '+' ||
+          lastSign === '%' ||
+          error
+        ) {
+          break;
+        }
+        if (!result && n2 && n2 !== 0) {
           setN2((previousValue) => previousValue * -1);
           setOperation(negate(operation, lastSign, n2));
           break;
         }
-        if (!error && n1 !== 0) {
+        if (n1 !== 0) {
           if (lastSign === '=' || lastSign === '%') {
             negateResult = n1 * -1;
           } else {
@@ -125,7 +136,7 @@ const Calculator = (props) => {
         }
         break;
       case '=':
-        // RESULT
+        // CALCULATE OPERATION (RESULT)
         if (
           lastSign === '/' ||
           lastSign === 'x' ||
@@ -188,36 +199,31 @@ const Calculator = (props) => {
         if (error) {
           break;
         }
+        if (operator === '/' && n2 && Number(n2) === 0) {
+          calculate();
+          break;
+        }
         if (n1 === '0') {
           setN1(0);
           setOperator(sign);
           setOperation('0 ' + sign + ' ');
           break;
         }
-        if (operator === '/' && n2 && Number(n2) === 0) {
-          calculate();
-          break;
-        }
         if (n2) {
           setN2(null);
+        }
+
+        let newOperation = operation;
+        if (operation.charAt(operation.length - 1) === '.') {
+          newOperation = operation.slice(0, -1);
         }
         if (
           lastSign === '/' ||
           lastSign === 'x' ||
           lastSign === '-' ||
-          lastSign === '+' ||
-          lastSign === '%' ||
-          (lastSign === '.' &&
-            operation.charAt(operation.length - 1) === '.')
+          lastSign === '+'
         ) {
-          let newOperation;
-          if (lastSign === '.') {
-            newOperation = operation.slice(0, -1);
-          } else if (lastSign === '%' && n2) {
-            newOperation = operation;
-          } else {
-            newOperation = operation.slice(0, -3);
-          }
+          newOperation = operation.slice(0, -3);
           setOperation(addBrackets(newOperation, sign));
           setOperator(sign);
           if (percentageMode) {
@@ -225,7 +231,6 @@ const Calculator = (props) => {
           } else {
             calculate();
           }
-          setN2(null);
           break;
         }
         if (n2 !== null && lastSign !== '=') {
@@ -234,10 +239,9 @@ const Calculator = (props) => {
           } else {
             calculate();
           }
-          setN2(null);
         }
         setOperator(sign);
-        setOperation(addBrackets(operation, sign));
+        setOperation(addBrackets(newOperation, sign));
         break;
       default:
         // NUMBERS
@@ -276,21 +280,25 @@ const Calculator = (props) => {
             return previousValue + sign;
           });
         } else if (operator) {
-          if (n2 === 0 && sign === 0) {
-            break;
+          if (n2 === 0) {
+            setN2(sign);
+            setOperation((previousValue) => {
+              return previousValue.slice(0, -1) + sign;
+            });
+          } else {
+            setN2((previousValue) => {
+              if (previousValue === null) {
+                return sign;
+              }
+              return previousValue + String(sign);
+            });
+            setOperation((previousValue) => {
+              return previousValue + String(sign);
+            });
           }
-          setN2((previousValue) => {
-            if (previousValue === null) {
-              return sign;
-            }
-            return previousValue + String(sign);
-          });
-          setOperation((previousValue) => {
-            return previousValue + String(sign);
-          });
         }
     }
-    // TO PREVENT OPERATORS DUPLICATION IN OPERATIONS
+    // TO PREVENT OPERATOR DUPLICATION IN OPERATIONS
     if (
       ((lastSign === '/' ||
         lastSign === 'x' ||
@@ -301,7 +309,17 @@ const Calculator = (props) => {
         lastSign === 'x' ||
         lastSign === '-' ||
         lastSign === '+') &&
-        sign === '=')
+        sign === '=') ||
+      ((lastSign === '/' ||
+        lastSign === 'x' ||
+        lastSign === '-' ||
+        lastSign === '+') &&
+        sign === '%') ||
+      ((lastSign === '/' ||
+        lastSign === 'x' ||
+        lastSign === '-' ||
+        lastSign === '+') &&
+        sign === 'N')
     ) {
       setLastSign('+');
     } else {
