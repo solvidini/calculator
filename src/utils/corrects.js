@@ -15,10 +15,10 @@ export const addBrackets = (operation, sign) => {
 export const negate = (operation, lastSign, n2) => {
   let newOperation = operation;
   if (n2) {
-    if (/(\(- \d+\))$/.test(operation)) {
+    if (/(\(- \d+\))$|(\(- \d+.\d+\))$/.test(operation)) {
       console.log(true);
       newOperation = newOperation.replace(
-        /(\(- \d+\))$/,
+        /(\(- \d+\))$|(\(- \d+.\d+\))$/,
         `${Math.abs(n2)}`
       );
     } else {
@@ -34,9 +34,9 @@ export const negate = (operation, lastSign, n2) => {
     lastSign === 'x' ||
     lastSign === '-' ||
     lastSign === '+' ||
-    (lastSign === ',' && operation.charAt(operation.length - 1) === ',')
+    (lastSign === '.' && operation.charAt(operation.length - 1) === '.')
   ) {
-    if (lastSign === ',') {
+    if (lastSign === '.') {
       newOperation = newOperation.slice(0, -1);
     } else {
       newOperation = newOperation.slice(0, -3);

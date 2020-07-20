@@ -30,7 +30,7 @@ const Calculator = (props) => {
           n2 &&
           lastSign !== '=' &&
           lastSign !== '%' &&
-          lastSign !== ',' &&
+          lastSign !== '.' &&
           Number(n1) !== 0
         ) {
           calculate('%');
@@ -41,7 +41,7 @@ const Calculator = (props) => {
       case 'N':
         // NEGATE
         let negateResult;
-        if (!error && !result && n2 !== 0) {
+        if (!error && !result && n2 && n2 !== 0) {
           setN2((previousValue) => previousValue * -1);
           setOperation(negate(operation, lastSign, n2));
           break;
@@ -70,14 +70,8 @@ const Calculator = (props) => {
         setResult(null);
         setError(false);
         break;
-      case ',':
+      case '.':
         // ADD DECIMAL POINT
-        if (n1 === '0' || error) {
-          setError(false);
-          setOperation('0,');
-          setN1('0.');
-          break;
-        }
         if (
           lastSign === '/' ||
           lastSign === 'x' ||
@@ -87,19 +81,25 @@ const Calculator = (props) => {
         ) {
           break;
         }
+        if (n1 === '0' || error) {
+          setError(false);
+          setOperation('0.');
+          setN1('0.');
+          break;
+        }
         if (lastSign === '=' || lastSign === 'N') {
           if (String(n1).includes('.')) {
             break;
           }
           setPercentageMode(false);
-          setOperation(result + ',');
+          setOperation(result + '.');
           setN1(n1 + '.');
           setResult(null);
           setN2(null);
           setOperator(null);
           break;
         }
-        if (!operator && lastSign !== ',') {
+        if (!operator && lastSign !== '.') {
           if (String(n1).includes('.')) {
             break;
           }
@@ -109,7 +109,7 @@ const Calculator = (props) => {
           setOperation((previousValue) => {
             return previousValue + sign;
           });
-        } else if (operator && lastSign !== ',') {
+        } else if (operator && lastSign !== '.') {
           if (String(n2).includes('.')) {
             break;
           }
@@ -171,7 +171,7 @@ const Calculator = (props) => {
               });
             }
           }
-          if (operation.charAt(operation.length - 1) === ',') {
+          if (operation.charAt(operation.length - 1) === '.') {
             setOperation(operation.slice(0, -1));
           }
           if (String(n2).charAt(String(n2).length - 1) === '.') {
@@ -189,11 +189,12 @@ const Calculator = (props) => {
           break;
         }
         if (n1 === '0') {
+          setN1(0);
           setOperator(sign);
           setOperation('0 ' + sign + ' ');
           break;
         }
-        if (operator === '/' && Number(n2) === 0) {
+        if (operator === '/' && n2 && Number(n2) === 0) {
           calculate();
           break;
         }
@@ -205,12 +206,15 @@ const Calculator = (props) => {
           lastSign === 'x' ||
           lastSign === '-' ||
           lastSign === '+' ||
-          (lastSign === ',' &&
-            operation.charAt(operation.length - 1) === ',')
+          lastSign === '%' ||
+          (lastSign === '.' &&
+            operation.charAt(operation.length - 1) === '.')
         ) {
           let newOperation;
-          if (lastSign === ',') {
+          if (lastSign === '.') {
             newOperation = operation.slice(0, -1);
+          } else if (lastSign === '%' && n2) {
+            newOperation = operation;
           } else {
             newOperation = operation.slice(0, -3);
           }
@@ -244,10 +248,7 @@ const Calculator = (props) => {
           setN1(sign);
           break;
         }
-        if (
-          (lastSign === '=' || lastSign === 'N' || lastSign === '%') &&
-          n1 !== '0'
-        ) {
+        if ((lastSign === '=' || lastSign === '%') && n1 !== '0') {
           setOperation(n1 + String(sign));
           setN1(n1 + String(sign));
           setResult(null);
@@ -295,7 +296,7 @@ const Calculator = (props) => {
         lastSign === 'x' ||
         lastSign === '-' ||
         lastSign === '+') &&
-        sign === ',') ||
+        sign === '.') ||
       ((lastSign === '/' ||
         lastSign === 'x' ||
         lastSign === '-' ||
@@ -313,12 +314,24 @@ const Calculator = (props) => {
     if (operatorArg === '%') {
       if (operator === '+') {
         result = +n1 + (n2 / 100) * n1;
+        result =
+          Math.round((result + Number.EPSILON) * 1000000000) /
+          1000000000;
       } else if (operator === '-') {
         result = +n1 - (n2 / 100) * n1;
+        result =
+          Math.round((result + Number.EPSILON) * 1000000000) /
+          1000000000;
       } else if (operator === 'x') {
         result = +n1 * (n2 / 100);
+        result =
+          Math.round((result + Number.EPSILON) * 1000000000) /
+          1000000000;
       } else if (operator === '/') {
         result = +n1 / (n2 / 100);
+        result =
+          Math.round((result + Number.EPSILON) * 1000000000) /
+          1000000000;
       }
       setN1(result);
       setResult(result);
@@ -470,7 +483,7 @@ const Calculator = (props) => {
           title="0"
         />
         <Control
-          onClick={() => actionHandler(',')}
+          onClick={() => actionHandler('.')}
           modifier="basic"
           title=","
         />
