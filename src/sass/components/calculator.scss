@@ -10,7 +10,7 @@
 
     @include respond(phone) {
         width: 92%;
-        max-height: 96vh;
+        max-height: 90vh;
         height: 70rem;
     }
 
@@ -55,7 +55,6 @@
 
     &__controls {
         flex: 1;
-        background-color: $color-white;
 
         display: grid;
         grid-template-rows: repeat(5, 1fr);
@@ -77,10 +76,7 @@
 
         cursor: pointer;
 
-        // transition: all .2s;
-
         &:hover {
-            // filter: brightness(120%);
             background: #f752a4;
             color: $color-white;
         }
