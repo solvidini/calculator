@@ -1,14 +1,19 @@
 export const addBrackets = (operation, sign) => {
-  let importantOperationPart = '';
+  let operationWithoutBrackets = '';
+  let isBracket = false;
 
   for (let i = operation.length - 1; i >= 0; i--) {
-    if (operation.charAt(i) === ')') break;
-    importantOperationPart += operation.charAt(i);
+    if (operation.charAt(i) === ')') isBracket = true;
+    if (operation.charAt(i) === '(') {
+      isBracket = false;
+      continue;
+    }
+    if (!isBracket) operationWithoutBrackets += operation.charAt(i);
   }
 
   if (
-    (importantOperationPart.includes('+') ||
-      importantOperationPart.includes('-')) &&
+    (operationWithoutBrackets.includes('+') ||
+      operationWithoutBrackets.includes('-')) &&
     (sign === 'x' || sign === '/')
   ) {
     if (
@@ -24,6 +29,19 @@ export const addBrackets = (operation, sign) => {
   }
 
   if (
+    operation.charAt(0) === '-' &&
+    operation.charAt(2) === '(' &&
+    operation.charAt(operation.length - 2) === ')' &&
+    operation.charAt(operation.length - 1) !== '%' &&
+    (sign === '+' || sign === '-')
+  ) {
+    let newOperation =
+      operation.substring(3).slice(0, -1) + ' ' + sign + ' ';
+    return newOperation;
+  }
+
+  if (
+    operation.charAt(0) === '(' &&
     operation.charAt(operation.length - 2) === ')' &&
     operation.charAt(operation.length - 1) !== '%' &&
     (sign === '+' || sign === '-')
@@ -40,7 +58,6 @@ export const negate = (operation, lastSign, n2) => {
   let newOperation = operation;
   if (n2) {
     if (/(\(- \d+\))$|(\(- \d+.\d+\))$/.test(operation)) {
-      console.log(true);
       newOperation = newOperation.replace(
         /(\(- \d+\))$|(\(- \d+.\d+\))$/,
         `${Math.abs(n2)}`
