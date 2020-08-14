@@ -1,6 +1,6 @@
 # Simple Calculator
-This is the calculator I created for the job recruitment.
-	
+Calculator for calculating basic math operations.
+
 ## Technologies
 To create it I used my favorite JavaScript library that is **React**.
 I also used **Sass** to help me create the visual part.
