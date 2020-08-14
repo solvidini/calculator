@@ -1,6 +1,14 @@
 export const addBrackets = (operation, sign) => {
+  let importantOperationPart = '';
+
+  for (let i = operation.length - 1; i >= 0; i--) {
+    if (operation.charAt(i) === ')') break;
+    importantOperationPart += operation.charAt(i);
+  }
+
   if (
-    (operation.includes('+') || operation.includes('-')) &&
+    (importantOperationPart.includes('+') ||
+      importantOperationPart.includes('-')) &&
     (sign === 'x' || sign === '/')
   ) {
     if (
@@ -14,14 +22,17 @@ export const addBrackets = (operation, sign) => {
     }
     return '(' + operation + ')  ' + sign + ' ';
   }
+
   if (
     operation.charAt(operation.length - 2) === ')' &&
-    operation.charAt(operation.length - 1) !== '%'
+    operation.charAt(operation.length - 1) !== '%' &&
+    (sign === '+' || sign === '-')
   ) {
     let newOperation =
       operation.substring(1).slice(0, -2) + ' ' + sign + ' ';
     return newOperation;
   }
+
   return operation + ' ' + sign + ' ';
 };
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import Control from './Control';
+import Control from '../components/Control';
 import { addBrackets, negate } from '../utils/corrects';
 
 const Calculator = (props) => {
@@ -13,13 +13,13 @@ const Calculator = (props) => {
   const [percentageMode, setPercentageMode] = useState(false);
   const [error, setError] = useState(false);
 
-  console.log('n1: ' + n1);
-  console.log('n2: ' + n2);
-  console.log('operator: ' + operator);
-  console.log('result: ' + result);
-  console.log('last sign: ' + lastSign);
-  console.log('Percentage mode: ' + percentageMode);
-  console.log('------------------');
+  // console.log('n1: ' + n1);
+  // console.log('n2: ' + n2);
+  // console.log('operator: ' + operator);
+  // console.log('result: ' + result);
+  // console.log('last sign: ' + lastSign);
+  // console.log('Percentage mode: ' + percentageMode);
+  // console.log('------------------');
 
   const actionHandler = (sign) => {
     try {
