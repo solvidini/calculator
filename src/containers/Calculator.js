@@ -255,14 +255,6 @@ const Calculator = (props) => {
             newOperation = operation.slice(0, -3);
             setOperation(addBrackets(newOperation, sign));
             setOperator(sign);
-            if (percentageMode) {
-              setPercentageMode(false);
-            } else {
-              calculate(n1, n2, operator, (result) => {
-                setN1(result);
-                setResult(result);
-              });
-            }
             break;
           }
           if (n2 !== null && lastSign !== '=') {
