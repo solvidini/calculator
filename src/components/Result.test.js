@@ -7,7 +7,7 @@ import Result from '../components/Result';
 
 Enzyme.configure({ adapter: new Adapter() });
 
-describe('Calculator', () => {
+describe('Result', () => {
   let wrapper;
   const resultProps = {
     error: 'Cannot divide by 0!',

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Control from '../components/Control';
 import Result from '../components/Result';
 import { addBrackets, negate } from '../utils/corrects';
+import calculate from '../utils/calculate';
 
 const Calculator = (props) => {
   const [n1, setN1] = useState('0');
@@ -36,9 +37,18 @@ const Calculator = (props) => {
             lastSign !== '.' &&
             Number(n1) !== 0
           ) {
-            calculate('%');
-            setPercentageMode(true);
-            setOperation((previousValue) => previousValue + '%');
+            calculate(
+              n1,
+              n2,
+              operator,
+              (result) => {
+                setN1(result);
+                setResult(result);
+                setPercentageMode(true);
+                setOperation((previousValue) => previousValue + '%');
+              },
+              true
+            );
           }
           break;
         case 'N':
@@ -64,7 +74,10 @@ const Calculator = (props) => {
             if (lastSign === '=' || lastSign === '%') {
               negateResult = n1 * -1;
             } else {
-              negateResult = calculate() * -1;
+              negateResult =
+                calculate(n1, n2, operator, (result) => {
+                  return result;
+                }) * -1;
             }
             setPercentageMode(false);
             setResult(negateResult);
@@ -155,7 +168,16 @@ const Calculator = (props) => {
             break;
           }
           if (percentageMode) {
-            calculate('%');
+            calculate(
+              n1,
+              n2,
+              operator,
+              (result) => {
+                setN1(result);
+                setResult(result);
+              },
+              true
+            );
             if (n2 && n2 < 0) {
               setOperation(
                 (previousValue) =>
@@ -196,7 +218,10 @@ const Calculator = (props) => {
             if (String(n2).charAt(String(n2).length - 1) === '.') {
               setN2(Number(String(n2).slice(0, -1)));
             }
-            calculate();
+            calculate(n1, n2, operator, (result) => {
+              setN1(result);
+              setResult(result);
+            });
           }
           break;
         case '/':
@@ -233,7 +258,10 @@ const Calculator = (props) => {
             if (percentageMode) {
               setPercentageMode(false);
             } else {
-              calculate();
+              calculate(n1, n2, operator, (result) => {
+                setN1(result);
+                setResult(result);
+              });
             }
             break;
           }
@@ -241,7 +269,10 @@ const Calculator = (props) => {
             if (percentageMode) {
               setPercentageMode(false);
             } else {
-              calculate();
+              calculate(n1, n2, operator, (result) => {
+                setN1(result);
+                setResult(result);
+              });
             }
           }
           setOperator(sign);
@@ -249,12 +280,8 @@ const Calculator = (props) => {
           break;
         default:
           // NUMBERS
-          setPercentageMode(false);
           if (error) {
-            setError(false);
-            setOperation(String(sign));
-            setN1(sign);
-            break;
+            actionHandler('C');
           }
           if (
             ((lastSign === '=' ||
@@ -355,76 +382,6 @@ const Calculator = (props) => {
       setOperator(null);
       setResult(null);
     }
-  };
-
-  const calculate = (operatorArg) => {
-    let result;
-    if (operatorArg === '%') {
-      if (operator === '+') {
-        result = +n1 + (n2 / 100) * n1;
-        result =
-          Math.round((result + Number.EPSILON) * 1000000000) /
-          1000000000;
-      } else if (operator === '-') {
-        result = +n1 - (n2 / 100) * n1;
-        result =
-          Math.round((result + Number.EPSILON) * 1000000000) /
-          1000000000;
-      } else if (operator === 'x') {
-        result = +n1 * (n2 / 100);
-        result =
-          Math.round((result + Number.EPSILON) * 1000000000) /
-          1000000000;
-      } else if (operator === '/') {
-        if (Number(n2) === 0) {
-          throw new Error('Cannot divide by 0!');
-        }
-        result = +n1 / (n2 / 100);
-        result =
-          Math.round((result + Number.EPSILON) * 1000000000) /
-          1000000000;
-      }
-      setN1(result);
-      setResult(result);
-    } else if (n2 !== null && operator) {
-      switch (operator) {
-        case '/':
-          if (Number(n2) === 0) {
-            throw new Error('Cannot divide by 0!');
-          }
-          result =
-            +Math.round((+n1 / +n2 + Number.EPSILON) * 1000000000) /
-            1000000000;
-          setN1(result);
-          setResult(result);
-          break;
-        case 'x':
-          result =
-            +Math.round((+n1 * +n2 + Number.EPSILON) * 1000000000) /
-            1000000000;
-          setN1(result);
-          setResult(result);
-          break;
-        case '-':
-          result =
-            +Math.round((+n1 - +n2 + Number.EPSILON) * 1000000000) /
-            1000000000;
-          setN1(result);
-          setResult(result);
-          break;
-        case '+':
-        default:
-          result =
-            +Math.round((+n1 + +n2 + Number.EPSILON) * 1000000000) /
-            1000000000;
-          setN1(result);
-          setResult(result);
-      }
-    } else {
-      result = n1;
-      setResult(n1);
-    }
-    return result;
   };
 
   return (

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Control = (props) => {
+const Result = (props) => {
   return (
     <div className="calculator__result">
       <div className="calculator__operation">
@@ -17,4 +17,4 @@ const Control = (props) => {
   );
 };
 
-export default Control;
+export default Result;
