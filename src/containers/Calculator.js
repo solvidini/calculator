@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import Control from '../components/Control';
+import Result from '../components/Result';
 import { addBrackets, negate } from '../utils/corrects';
 
 const Calculator = (props) => {
@@ -428,14 +429,13 @@ const Calculator = (props) => {
 
   return (
     <div className="calculator">
-      <div className="calculator__result">
-        <div className="calculator__operation">
-          {error ? error : operation}
-        </div>
-        <div className="calculator__result-value">
-          {result !== null ? result : n2 ? n2 : n1}
-        </div>
-      </div>
+      <Result
+        error={error}
+        n1={n1}
+        n2={n2}
+        result={result}
+        operation={operation}
+      />
       <div className="calculator__controls">
         <Control
           onClick={() => actionHandler('%')}
