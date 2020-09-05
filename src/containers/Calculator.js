@@ -15,13 +15,13 @@ const Calculator = (props) => {
   const [percentageMode, setPercentageMode] = useState(false);
   const [error, setError] = useState(false);
 
-  // console.log('n1: ' + n1);
-  // console.log('n2: ' + n2);
-  // console.log('operator: ' + operator);
-  // console.log('result: ' + result);
-  // console.log('last sign: ' + lastSign);
-  // console.log('Percentage mode: ' + percentageMode);
-  // console.log('------------------');
+  console.log('n1: ' + n1);
+  console.log('n2: ' + n2);
+  console.log('operator: ' + operator);
+  console.log('result: ' + result);
+  console.log('last sign: ' + lastSign);
+  console.log('Percentage mode: ' + percentageMode);
+  console.log('------------------');
 
   const actionHandler = (sign) => {
     try {
@@ -66,18 +66,20 @@ const Calculator = (props) => {
             break;
           }
           if (!result && n2 && n2 !== 0) {
+            console.log('here');
             setN2((previousValue) => previousValue * -1);
             setOperation(negate(operation, lastSign, n2));
             break;
           }
           if (n1 !== 0) {
-            if (lastSign === '=' || lastSign === '%') {
+            if (
+              lastSign === '=' ||
+              lastSign === '%' ||
+              lastSign === 'N'
+            ) {
               negateResult = n1 * -1;
             } else {
-              negateResult =
-                calculate(n1, n2, operator, (result) => {
-                  return result;
-                }) * -1;
+              negateResult = n1 * -1;
             }
             setPercentageMode(false);
             setResult(negateResult);
