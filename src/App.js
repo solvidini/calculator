@@ -4,16 +4,11 @@ import Calculator from './containers/Calculator';
 
 function App() {
   return (
-    <div className="app">
+    <div className='app'>
       <Calculator />
-      <div className="app__caption">
+      <div className='app__caption'>
         Calculator by{' '}
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="http://samuelk.pl/"
-          className="link"
-        >
+        <a target='_blank' rel='noopener noreferrer' href='https://front-up.pro/' className='link'>
           Samuel Kędziora
         </a>
       </div>
